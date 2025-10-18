@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Accueil - Baskets</title>
+  <style> body { font-family: sans-serif; text-align: center; padding: 20px; } .product { margin: 20px; padding: 15px; border: 1px solid #ddd; display: inline-block; }</style>
+</head>
+<body>
+  <h1>🏠 Bienvenue !</h1>
+  <p>Choisis ta paire :</p>
+  
+  <div class="product">
+    <h3>Nike Air Max</h3>
+    <button onclick="trackEvent('product_selected', {product: 'Nike Air Max'})">Choisir</button>
+  </div>
+  
+  <div class="product">
+    <h3>Adidas Ultraboost</h3>
+    <button onclick="trackEvent('product_selected', {product: 'Adidas Ultraboost'})">Choisir</button>
+  </div>
+  
+  <div class="product">
+    <h3>Puma RS-X</h3>
+    <button onclick="trackEvent('product_selected', {product: 'Puma RS-X'})">Choisir</button>
+  </div>
+
+  <script>
+  (function () {
+    const BACKEND_URL = 'https://REPLACE_ME.onrender.com';
+    const visitorId = localStorage.getItem('vid') || (Math.random().toString(36).substr(2,9) + Date.now().toString(36));
+    localStorage.setItem('vid', visitorId);
+
+    async function getIP() {
+      try {
+        const res = await fetch('https://api.ipify.org?format=json');
+        return (await res.json()).ip;
+      } catch { return '0.0.0.0'; }
+    }
+
+    window.trackEvent = async (type, eventData = {}) => {
+      const ip = await getIP();
+      try {
+        await fetch(BACKEND_URL + '/event', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type, visitorId, ip, eventData })
+        });
+      } catch (e) { console.warn("⚠️ Échec du tracking"); }
+      checkTarget();
+    };
+
+    function checkTarget() {
+      setInterval(async () => {
+        try {
+          const res = await fetch(`${BACKEND_URL}/target/${visitorId}`);
+          const d = await res.json();
+          if (d.target && d.target !== window.location.pathname) {
+            window.location.href = d.target;
+          }
+        } catch (e) {}
+      }, 2000);
+    }
+
+    if (['/', '/index.html'].includes(window.location.pathname)) {
+      trackEvent('new_user');
+    }
+  })();
+  </script>
+</body>
+</html>
