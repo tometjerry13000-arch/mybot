@@ -1,35 +1,77 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Accueil</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BasketStore 🏀</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: #f3f4f6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      color: #111827;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    p {
+      color: #4b5563;
+      margin-bottom: 2rem;
+    }
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    button:hover {
+      background: #1e40af;
+      transform: scale(1.05);
+    }
+    footer {
+      position: absolute;
+      bottom: 20px;
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
+  </style>
 </head>
 <body>
-<h1>🏀 Bienvenue sur Basket Shop</h1>
-<button id="btnProduct">Voir les produits</button>
+  <h1>🏀 Bienvenue sur <strong>BasketStore</strong></h1>
+  <p>Découvrez nos dernières baskets tendance !</p>
+  <button id="seeProduct">👟 Voir les produits</button>
 
-<script>
-async function notifyVisit(){
-    const res = await fetch('/api/visit');
-    const data = await res.json();
-    console.log('Visite notifiée', data);
-}
-notifyVisit();
+  <footer>© 2025 BasketStore — Tous droits réservés</footer>
 
-document.getElementById('btnProduct').addEventListener('click',()=>{
-    window.location.href='/product.html';
-});
+  <script>
+    // 🔹 Notification visite initiale (page d'accueil)
+    fetch('/api/visit', { method: 'GET' })
+      .then(() => console.log('Visite enregistrée'))
+      .catch(err => console.error('Erreur /api/visit:', err));
 
-// Polling redirection bot
-async function pollRedirect(){
-    const res = await fetch('/api/status');
-    const data = await res.json();
-    if(data.redirect && window.location.pathname !== data.redirect){
-        window.location.href = data.redirect;
-    }
-    setTimeout(pollRedirect,1000);
-}
-pollRedirect();
-</script>
+    // 🔹 Interaction bouton "Voir produit"
+    document.getElementById('seeProduct').addEventListener('click', async () => {
+      try {
+        await fetch('/api/interaction', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (err) {
+        console.error('Erreur interaction produit:', err);
+      }
+      // Redirection vers page produit
+      window.location.href = '/product.html';
+    });
+  </script>
 </body>
 </html>
