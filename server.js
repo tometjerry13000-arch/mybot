@@ -88,6 +88,18 @@ app.get('/api/visit', (req, res) => {
   res.json({ ok: true, ip });
 });
 
+
+// Interaction bouton "Voir produit"
+app.post("/api/interaction", (req, res) => {
+  const ip = getIP(req);
+  sessions[ip] = sessions[ip] || { data: { ip, page: "Accueil" }, redirect: null, queue: [] };
+  sessions[ip].data.page = "Produit";
+  sendTelegramNotif({ ...sessions[ip].data, page: "Produit" }, "🖱️ Interaction vers page produit");
+  res.json({ ok: true });
+});
+
+
+
 // Choix produit
 app.post('/api/pair', (req, res) => {
   const { pair } = req.body;
