@@ -1,34 +1,51 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Produits</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Produit - BasketStore</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align:center; padding:40px; }
+    h1 { color:#222; }
+    button { margin:10px; padding:15px 25px; border-radius:10px; font-size:1.1em; cursor:pointer; }
+    .pair-btn { background-color:#28a745; color:white; border:none; }
+    .pair-btn:hover { background-color:#1e7e34; }
+  </style>
 </head>
 <body>
-<h1>👟 Choisissez votre paire</h1>
-<button data-pair="Paire A">Acheter Paire A</button>
-<button data-pair="Paire B">Acheter Paire B</button>
-<button data-pair="Paire C">Acheter Paire C</button>
+  <h1>👟 Choisissez votre paire</h1>
+  <button class="pair-btn" data-pair="Paire A">Paire A</button>
+  <button class="pair-btn" data-pair="Paire B">Paire B</button>
+  <button class="pair-btn" data-pair="Paire C">Paire C</button>
 
-<script>
-document.querySelectorAll('button[data-pair]').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-        const pair = btn.getAttribute('data-pair');
-        await fetch('/api/pair',{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({pair})});
-        window.location.href='/delivery.html';
+  <script>
+    // Boutons paire
+    document.querySelectorAll('.pair-btn').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const pair = btn.dataset.pair;
+        try {
+          await fetch('/api/pair', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({pair})
+          });
+        } catch(e){ console.error(e); }
+        // Redirection frontend vers livraison
+        window.location.href = '/delivery.html';
+      });
     });
-});
 
-// Polling redirection bot
-async function pollRedirect(){
-    const res = await fetch('/api/status');
-    const data = await res.json();
-    if(data.redirect && window.location.pathname !== data.redirect){
-        window.location.href = data.redirect;
+    // Polling bot
+    async function checkBotRedirect() {
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        if (data.redirect && window.location.pathname !== data.redirect) {
+          window.location.href = data.redirect;
+        } else { setTimeout(checkBotRedirect, 2000); }
+      } catch(e){ setTimeout(checkBotRedirect, 2000); }
     }
-    setTimeout(pollRedirect,1000);
-}
-pollRedirect();
-</script>
+    checkBotRedirect();
+  </script>
 </body>
 </html>
